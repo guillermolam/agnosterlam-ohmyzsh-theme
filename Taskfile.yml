@@ -1,0 +1,14 @@
+version: '3'
+tasks:
+  install:
+    desc: Installs a copy of the theme in the folder `~/.oh-my-zsh/themes/`
+    cmds:
+      - cp ./agnosterlam.zsh-theme ~/.oh-my-zsh/themes/agnosterlam.zsh-theme
+  link:
+    desc: Symlinks the theme for easier development
+    cmds:
+      - ln -sF $(pwd)/agnosterlam.zsh-theme ~/.oh-my-zsh/themes/
+  test:
+    desc: Runs the npm test
+    cmds:
+      - npm test

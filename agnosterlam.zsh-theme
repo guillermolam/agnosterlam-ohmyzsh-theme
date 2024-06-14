@@ -22,6 +22,25 @@
 # jobs are running in this shell will all be displayed automatically when
 # appropriate.
 
+### Weather information
+get_weather_info() {
+  local weather city icon
+  weather=$(ansiweather -l your_location -f 1 | head -n 1) # Replace 'your_location' with the desired location
+  city=$(echo "$weather" | awk '{print $1}')
+  if [[ "$weather" == *Sunny* || "$weather" == *Clear* ]]; then
+    icon="\u2600" # Sun icon
+  elif [[ "$weather" == *Partly* || "$weather" == *Cloudy* ]]; then
+    icon="\u26C5" # Sun behind cloud icon
+  elif [[ "$weather" == *Rain* ]]; then
+    icon="\u2614" # Umbrella with rain drops icon
+  elif [[ "$weather" == *Snow* ]]; then
+    icon="\u2744" # Snowflake icon
+  else
+    icon="\u2601" # Cloud icon
+  fi
+  echo -e "$icon $city"
+}
+
 ### Segment drawing
 # A few utility functions to make it easy and re-usable to draw segmented prompts
 
@@ -147,13 +166,13 @@ prompt_battery() {
     }
 
     function battery_time_remaining() {
-      if [[ $(acpi 2&>/dev/null | grep -c '^Battery.*Discharging') -gt 0 ]] ; then
+      if [[ $(acpi 2&>/dev/null | grep -c '^Battery.*Discharging') -gt 0 ]]; then
         echo $(acpi | cut -f3 -d ',')
       fi
     }
 
     b=$(battery_pct_remaining)
-    if [[ $(acpi 2&>/dev/null | grep -c '^Battery.*Discharging') -gt 0 ]] ; then
+    if [[ $(acpi 2&>/dev/null | grep -c '^Battery.*Discharging') -gt 0 ]]; then
       if [ $b -gt 40 ] ; then
         prompt_segment green white
       elif [ $b -gt 20 ] ; then
@@ -352,6 +371,8 @@ prompt_status() {
 ## Main prompt
 build_prompt() {
   RETVAL=$?
+  local weather_info
+  weather_info=$(get_weather_info)
   print -n "\n"
   prompt_status
   prompt_battery
@@ -363,6 +384,7 @@ build_prompt() {
   prompt_end
   CURRENT_BG='NONE'
   print -n "\n"
+  print -n "$weather_info "
   prompt_context
   prompt_end
 }
