@@ -41,9 +41,9 @@ get_weather_info() {
     else
       icon="\u2601" # Cloud icon
     fi
-    echo -e "$icon $city $temp" > "$weather_file"
+    echo -e "$icon\n$city\n$temp" > "$weather_file"
   else
-    read -r icon city temp < "$weather_file"
+    IFS=$'\n' read -r icon city temp < "$weather_file"
   fi
 
   echo -e "$icon\n$city\n$temp"
@@ -412,6 +412,7 @@ build_prompt() {
   local weather_info icon city temp
   weather_info=$(get_weather_info)
   IFS=$'\n' read -r icon city temp <<< "$weather_info"
+  echo "Debug: icon='$icon', city='$city', temp='$temp'" # Debugging line
   print -n "\n"
   prompt_status
   prompt_battery
