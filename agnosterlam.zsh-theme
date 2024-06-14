@@ -1,30 +1,6 @@
-# vim:ft=zsh ts=2 sw=2 sts=2
-#
-# agnoster's Theme - https://gist.github.com/3712874
-# A Powerline-inspired theme for ZSH
-#
-# # README
-#
-# In order for this theme to render correctly, you will need a
-# [Powerline-patched font](https://gist.github.com/1595572).
-#
-# In addition, I recommend the
-# [Solarized theme](https://github.com/altercation/solarized/) and, if you're
-# using it on Mac OS X, [iTerm 2](http://www.iterm2.com/) over Terminal.app -
-# it has significantly better color fidelity.
-#
-# # Goals
-#
-# The aim of this theme is to only show you *relevant* information. Like most
-# prompts, it will only show git information when in a git working directory.
-# However, it goes a step further: everything from the current user and
-# hostname to whether the last call exited with an error to whether background
-# jobs are running in this shell will all be displayed automatically when
-# appropriate.
-
 ### Weather information
 get_weather_info() {
-  local weather city icon weather_file location_file last_update current_time
+  local weather city temp icon weather_file location_file last_update current_time
   weather_file="/tmp/weather_info.txt"
   location_file="/tmp/location_info.txt"
 
@@ -65,12 +41,12 @@ get_weather_info() {
     else
       icon="\u2601" # Cloud icon
     fi
-    echo -e "$icon $city $temp°C" > "$weather_file"
+    echo -e "$icon $city $temp" > "$weather_file"
   else
     read -r icon city temp < "$weather_file"
   fi
 
-  echo -e "$icon $city $temp°C"
+  echo -e "$icon\n$city\n$temp"
 }
 
 ### Segment drawing
@@ -165,7 +141,7 @@ prompt_battery() {
     }
 
     b=$(battery_pct_remaining)
-    if [[ $(ioreg -rc AppleSmartBattery | grep -c '^.*"ExternalConnected"\ =\ No') -eq 1 ]] ; then
+    if [[ $(ioreg -rc AppleSmartBattery | grep -c '^.*"ExternalConnected"\ =\ No') -eq 1 ]]; then
       if [ $b -gt 50 ] ; then
         prompt_segment green white
       elif [ $b -gt 20 ] ; then
@@ -217,29 +193,35 @@ prompt_battery() {
   fi
 
   if [[ $(uname -r) == *-microsoft-* ]]; then
-    function battery_info_wsl() {
-      local battery_status charge battery_status_code
-      battery_status=$(powershell.exe -Command "Get-WmiObject -Class Win32_Battery | Select-Object EstimatedChargeRemaining, BatteryStatus" | tr -d '\r')
-      charge=$(echo "$battery_status" | grep EstimatedChargeRemaining | awk '{print $2}')
-      battery_status_code=$(echo "$battery_status" | grep BatteryStatus | awk '{print $2}')
+      function battery_info_wsl()
+      {
+          local battery_status charge battery_status_code
+          battery_status=$(powershell.exe -Command "Get-WmiObject -Class Win32_Battery | Select-Object EstimatedChargeRemaining, BatteryStatus" | tr -d '\r')
+          charge=$(echo "$battery_status" | grep EstimatedChargeRemaining | awk '{print $2}')
+          battery_status_code=$(echo "$battery_status" | grep BatteryStatus | awk '{print $2}')
 
-      if [[ $battery_status_code -eq 2 ]]; then
-        echo "$charge% (Charging)"
+          # If charge is not a valid number, default to 100 (assuming it's fully charged when plugged in)
+          if ! [[ "$charge" =~ ^[0-9]+$ ]]; then
+              charge=100
+          fi
+
+          if [[ $battery_status_code -eq 2 ]]; then
+              echo "$charge (Charging)"
+          else
+              echo "$charge"
+          fi
+      }
+
+      b=$(battery_info_wsl | awk '{print $1}')
+      if [[ $b -gt 40 ]]; then
+          prompt_segment green white
+      elif [[ $b -gt 20 ]]; then
+          prompt_segment yellow white
       else
-        echo "$charge%"
+          prompt_segment red white
       fi
-    }
-
-    b=$(battery_info_wsl)
-    if [[ $b -gt 40 ]]; then
-      prompt_segment green white
-    elif [[ $b -gt 20 ]]; then
-      prompt_segment yellow white
-    else
-      prompt_segment red white
+      echo -n "%{$fg_bold[white]%}$HEART$b%%%{$fg_no_bold[white]%}"
     fi
-    echo -n "%{$fg_bold[white]%}$HEART$b%%%{$fg_no_bold[white]%}"
-  fi
 }
 
 # Git: branch/detached head, dirty status
@@ -427,8 +409,9 @@ prompt_status() {
 ## Main prompt
 build_prompt() {
   RETVAL=$?
-  local weather_info
+  local weather_info icon city temp
   weather_info=$(get_weather_info)
+  IFS=$'\n' read -r icon city temp <<< "$weather_info"
   print -n "\n"
   prompt_status
   prompt_battery
@@ -440,7 +423,9 @@ build_prompt() {
   prompt_end
   CURRENT_BG='NONE'
   print -n "\n"
-  print -n "$weather_info "
+  prompt_segment white blue "$icon"
+  prompt_segment blue white "$city"
+  prompt_segment white blue "$temp°C"
   prompt_context
   prompt_end
 }
