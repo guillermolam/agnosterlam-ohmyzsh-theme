@@ -24,21 +24,53 @@
 
 ### Weather information
 get_weather_info() {
-  local weather city icon
-  weather=$(ansiweather -l your_location -f 1 | head -n 1) # Replace 'your_location' with the desired location
-  city=$(echo "$weather" | awk '{print $1}')
-  if [[ "$weather" == *Sunny* || "$weather" == *Clear* ]]; then
-    icon="\u2600" # Sun icon
-  elif [[ "$weather" == *Partly* || "$weather" == *Cloudy* ]]; then
-    icon="\u26C5" # Sun behind cloud icon
-  elif [[ "$weather" == *Rain* ]]; then
-    icon="\u2614" # Umbrella with rain drops icon
-  elif [[ "$weather" == *Snow* ]]; then
-    icon="\u2744" # Snowflake icon
+  local weather city icon weather_file location_file last_update current_time
+  weather_file="/tmp/weather_info.txt"
+  location_file="/tmp/location_info.txt"
+
+  current_time=$(date +%s)
+
+  if [[ -f $location_file ]]; then
+    last_update=$(stat -c %Y "$location_file")
   else
-    icon="\u2601" # Cloud icon
+    last_update=0
   fi
-  echo -e "$icon $city"
+
+  if (( current_time - last_update >= 3600 )); then
+    city=$(curl -s ipinfo.io | jq -r '.city')
+    echo "$city" > "$location_file"
+  else
+    city=$(cat "$location_file")
+  fi
+
+  if [[ -f $weather_file ]]; then
+    last_update=$(stat -c %Y "$weather_file")
+  else
+    last_update=0
+  fi
+
+  if (( current_time - last_update >= 3600 )); then
+    api_key="85a4e3c55b73909f42c6a23ec35b7147"
+    weather=$(curl -s "https://api.openweathermap.org/data/2.5/weather?q=$city&units=metric&appid=$api_key")
+    temp=$(echo "$weather" | jq '.main.temp' | xargs printf "%.0f")
+    description=$(echo "$weather" | jq -r '.weather[0].description')
+    if [[ "$description" == *sun* || "$description" == *clear* ]]; then
+      icon="\u2600" # Sun icon
+    elif [[ "$description" == *cloud* ]]; then
+      icon="\u26C5" # Sun behind cloud icon
+    elif [[ "$description" == *rain* ]]; then
+      icon="\u2614" # Umbrella with rain drops icon
+    elif [[ "$description" == *snow* ]]; then
+      icon="\u2744" # Snowflake icon
+    else
+      icon="\u2601" # Cloud icon
+    fi
+    echo -e "$icon $city $temp°C" > "$weather_file"
+  else
+    read -r icon city temp < "$weather_file"
+  fi
+
+  echo -e "$icon $city $temp°C"
 }
 
 ### Segment drawing
@@ -173,16 +205,40 @@ prompt_battery() {
 
     b=$(battery_pct_remaining)
     if [[ $(acpi 2&>/dev/null | grep -c '^Battery.*Discharging') -gt 0 ]]; then
-      if [ $b -gt 40 ] ; then
+      if [ $b -gt 40 ]; then
         prompt_segment green white
-      elif [ $b -gt 20 ] ; then
+      elif [ $b -gt 20 ]; then
         prompt_segment yellow white
       else
         prompt_segment red white
       fi
       echo -n "%{$fg_bold[white]%}$HEART$(battery_pct_remaining)%%%{$fg_no_bold[white]%}"
     fi
+  fi
 
+  if [[ $(uname -r) == *-microsoft-* ]]; then
+    function battery_info_wsl() {
+      local battery_status charge battery_status_code
+      battery_status=$(powershell.exe -Command "Get-WmiObject -Class Win32_Battery | Select-Object EstimatedChargeRemaining, BatteryStatus")
+      charge=$(echo "$battery_status" | grep EstimatedChargeRemaining | awk '{print $2}')
+      battery_status_code=$(echo "$battery_status" | grep BatteryStatus | awk '{print $2}')
+
+      if [[ $battery_status_code -eq 2 ]]; then
+        echo "$charge% (Charging)"
+      else
+        echo "$charge%"
+      fi
+    }
+
+    b=$(battery_info_wsl)
+    if [[ $b -gt 40 ]]; then
+      prompt_segment green white
+    elif [[ $b -gt 20 ]]; then
+      prompt_segment yellow white
+    else
+      prompt_segment red white
+    fi
+    echo -n "%{$fg_bold[white]%}$HEART$b%%%{$fg_no_bold[white]%}"
   fi
 }
 

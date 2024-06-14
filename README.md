@@ -1,10 +1,12 @@
-# agnosterlam for oh-my-zsh ![Travis CI](https://travis-ci.org/guillermolam/agnosterlam-ohmyzsh-theme.svg)
+# agnosterlam for oh-my-zsh
 
 agnosterlam is a [oh-my-zsh shell](https://github.com/robbyrussell/oh-my-zsh) theme based on the
 [Powerline Vim plugin](https://github.com/Lokaltog/vim-powerline) &
 [Agnoster Theme](https://gist.github.com/agnoster/3712874).
 
 It currently shows:
+- Weather
+- Location based on your IP
 - Battery Life (in case of the laptop is not charging)
 - Timestamp
 - Current directory
@@ -13,7 +15,7 @@ It currently shows:
 
 ## Preview
 
-![Preview](images/agnosterlam-01.png)
+![Preview]()
 
 
 ## Other color schemes
