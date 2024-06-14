@@ -219,7 +219,7 @@ prompt_battery() {
   if [[ $(uname -r) == *-microsoft-* ]]; then
     function battery_info_wsl() {
       local battery_status charge battery_status_code
-      battery_status=$(powershell.exe -Command "Get-WmiObject -Class Win32_Battery | Select-Object EstimatedChargeRemaining, BatteryStatus")
+      battery_status=$(powershell.exe -Command "Get-WmiObject -Class Win32_Battery | Select-Object EstimatedChargeRemaining, BatteryStatus" | tr -d '\r')
       charge=$(echo "$battery_status" | grep EstimatedChargeRemaining | awk '{print $2}')
       battery_status_code=$(echo "$battery_status" | grep BatteryStatus | awk '{print $2}')
 
