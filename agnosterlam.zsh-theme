@@ -1,6 +1,6 @@
 ### Weather information
 get_weather_info() {
-  local weather city temp icon weather_file location_file last_update current_time
+  local weather city temp icon description weather_file location_file last_update current_time
   weather_file="/tmp/weather_info.txt"
   location_file="/tmp/location_info.txt"
 
@@ -43,7 +43,9 @@ get_weather_info() {
     fi
     echo -e "$icon\n$city\n$temp" > "$weather_file"
   else
-    IFS=$'\n' read -r icon city temp < "$weather_file"
+    icon=$(sed -n '1p' "$weather_file")
+    city=$(sed -n '2p' "$weather_file")
+    temp=$(sed -n '3p' "$weather_file")
   fi
 
   echo -e "$icon\n$city\n$temp"
@@ -98,7 +100,7 @@ prompt_context() {
   if [[ -n "$SSH_CLIENT" ]]; then
     prompt_segment magenta white "%{$fg_bold[white]%(!.%{%F{white}%}.)%}$USER@%m%{$fg_no_bold[white]%}"
   else
-    prompt_segment yellow magenta "%{$fg_bold[magenta]%(!.%{%F{magenta}%}.)%}@$USER%{$fg_no_bold[magenta]%}"
+    prompt_segment yellow magenta "%{$fg_bold[magenta]%(!.%{%F{magenta}%}.)%}$USER%{$fg_no_bold[magenta]%}"
   fi
 }
 
@@ -144,7 +146,7 @@ prompt_battery() {
     if [[ $(ioreg -rc AppleSmartBattery | grep -c '^.*"ExternalConnected"\ =\ No') -eq 1 ]]; then
       if [ $b -gt 50 ] ; then
         prompt_segment green white
-      elif [ $b -gt 20 ] ; then
+      elif [ $b -gt 20 ]; then
         prompt_segment yellow white
       else
         prompt_segment red white
@@ -412,7 +414,7 @@ build_prompt() {
   local weather_info icon city temp
   weather_info=$(get_weather_info)
   IFS=$'\n' read -r icon city temp <<< "$weather_info"
-  echo "Debug: icon='$icon', city='$city', temp='$temp'" # Debugging line
+  echo "Debug: icon='$icon', city='$city', temp='$temp'" >&2 # Debugging line to stderr
   print -n "\n"
   prompt_status
   prompt_battery
