@@ -1,35 +1,49 @@
-### Weather information
 get_weather_info() {
   local weather city temp icon description weather_file location_file last_update current_time
   weather_file="/tmp/weather_info.txt"
   location_file="/tmp/location_info.txt"
 
   current_time=$(date +%s)
+  echo "Debug: current_time='$current_time'"
 
   if [[ -f $location_file ]]; then
     last_update=$(stat -c %Y "$location_file")
+    echo "Debug: Location file found. last_update='$last_update'"
   else
     last_update=0
+    echo "Debug: Location file not found. Setting last_update to 0"
   fi
 
   if (( current_time - last_update >= 3600 )); then
+    echo "Debug: Fetching city information from ipinfo.io"
     city=$(curl -s ipinfo.io | jq -r '.city')
+    echo "Debug: city='$city'"
     echo "$city" > "$location_file"
   else
     city=$(cat "$location_file")
+    echo "Debug: Using cached city information. city='$city'"
   fi
 
   if [[ -f $weather_file ]]; then
     last_update=$(stat -c %Y "$weather_file")
+    echo "Debug: Weather file found. last_update='$last_update'"
   else
     last_update=0
+    echo "Debug: Weather file not found. Setting last_update to 0"
   fi
 
   if (( current_time - last_update >= 3600 )); then
     api_key="85a4e3c55b73909f42c6a23ec35b7147"
+    echo "Debug: Fetching weather information for city='$city' from OpenWeatherMap API"
     weather=$(curl -s "https://api.openweathermap.org/data/2.5/weather?q=$city&units=metric&appid=$api_key")
-    temp=$(echo "$weather" | jq '.main.temp' | xargs printf "%.0f")
+    echo "Debug: Raw weather data='$weather'"
+
+    temp=$(echo "$weather" | jq '.main.temp')
+    echo "Debug: Extracted temperature='$temp'"
+
     description=$(echo "$weather" | jq -r '.weather[0].description')
+    echo "Debug: Extracted description='$description'"
+
     if [[ "$description" == *sun* || "$description" == *clear* ]]; then
       icon="\u2600" # Sun icon
     elif [[ "$description" == *cloud* ]]; then
@@ -41,14 +55,16 @@ get_weather_info() {
     else
       icon="\u2601" # Cloud icon
     fi
+    echo "Debug: Set weather icon='$icon'"
+
     echo -e "$icon\n$city\n$temp" > "$weather_file"
+    echo "Debug: Weather information written to file"
   else
     icon=$(sed -n '1p' "$weather_file")
     city=$(sed -n '2p' "$weather_file")
     temp=$(sed -n '3p' "$weather_file")
+    echo "Debug: Using cached weather information. icon='$icon', city='$city', temp='$temp'"
   fi
-
-  echo -e "$icon\n$city\n$temp"
 }
 
 ### Segment drawing
@@ -414,7 +430,7 @@ build_prompt() {
   local weather_info icon city temp
   weather_info=$(get_weather_info)
   IFS=$'\n' read -r icon city temp <<< "$weather_info"
-  echo "Debug: icon='$icon', city='$city', temp='$temp'" >&2 # Debugging line to stderr
+  echo "Debug: icon='$icon', city='$city', temp='$temp'"  # Debugging line to stderr
   print -n "\n"
   prompt_status
   prompt_battery
