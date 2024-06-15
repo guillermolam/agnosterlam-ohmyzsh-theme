@@ -31,7 +31,7 @@ echo "Adding custom prompt to .zshrc..."
 if ! grep -q "source ~/weather-prompt/zsh/weather.zsh" ~/.zshrc; then
   echo "source ~/weather-prompt/zsh/weather.zsh" >> ~/.zshrc
 else
-  echo "Custom prompt is already added to .zshrc."
+  echo "Agnosterlam is already added to .zshrc."
 fi
 
-echo "Installation complete! Please restart your terminal."
+echo "Installation complete! Please restart your Agnoterminal."
