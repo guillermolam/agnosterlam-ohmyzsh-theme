@@ -28,7 +28,9 @@ It's better to use agnosterlam with a Solarized dark color scheme or others dark
 In order to use the theme, you will first need:
 
 * Powerline compatible fonts like [Vim Powerline patched fonts](https://github.com/Lokaltog/powerline-fonts), [Input Mono](http://input.fontbureau.com/) or [Monoid](http://larsenwork.com/monoid/).
+
 * On Ubuntu like systems you'll need the `ttf-ancient-fonts` package to correctly display some unicode symbols that are not covered by the Powerline fonts above.
+
 * A ZSH framework like [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
 
 
@@ -80,22 +82,7 @@ If you're using Linux, install `acpi` package (i.e. `sudo apt install acpi`).
 |![git-modified](images/agnosterlam-git-4.png)|There are modified or deleted files but unstaged
 
 #### Icons
-|Icon|Meaning
-|----|-------|
-|`✔`|clean directory
-|`☀`|new untracked files preceeded by their number
-|`✚`|added files from the new untracked ones preceeded by their number
-|`‒`|deleted files preceeded by their number
-|`●`|modified files preceeded by their number
-|`±`|added files from the modifies or delete ones preceeded by their number
-|`⚑`|ready to commit
-|`⚙`|sets of stashed files preceeded by their number
-|`☊`|branch has a stream, preceeded by his remote name
-|`↑`|commits ahead on the current branch comparing to remote, preceeded by their number
-|`↓`|commits behind on the current branch comparing to remote, preceeded by their number
-|`<B>`|bisect state on the current branch
-|`>M<`|Merge state on the current branch
-|`>R>`|Rebase state on the current branch
+Not leveraging more than just 1 Nerd Font, needed for [nerd-icons.el](https://github.com/rainstormstudio/nerd-icons.el)
 
 ## Credits
 
