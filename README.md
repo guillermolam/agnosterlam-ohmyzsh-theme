@@ -13,9 +13,40 @@ It currently shows:
 - Git status
 - User & Host status
 
-## Preview
+## Project overview
+```bash
+weather-prompt/
+├── install.sh
+├── rust_script/
+│   ├── Cargo.toml
+│   └── src/
+│       └── main.rs
+└── zsh/
+    └── weather.zsh
+```
 
-![Preview]()
+Clone the repository:
+
+sh
+Copy code
+```
+git clone https://github.com/yourusername/weather-prompt.git
+cd weather-prompt
+```
+Make the install script executable and run it:
+
+Copy code
+```
+chmod +x install.sh
+./install.sh
+```
+This setup script checks for dependencies, installs them if necessary, compiles the Rust script, moves the executable to /usr/local/bin, and updates the user's .zshrc to include the custom prompt.
+
+
+
+
+
+
 
 
 ## Other color schemes
@@ -26,66 +57,3 @@ It's better to use agnosterlam with a Solarized dark color scheme or others dark
 ## Requirements
 
 In order to use the theme, you will first need:
-
-* Powerline compatible fonts like [Vim Powerline patched fonts](https://github.com/Lokaltog/powerline-fonts), [Input Mono](http://input.fontbureau.com/) or [Monoid](http://larsenwork.com/monoid/).
-
-* On Ubuntu like systems you'll need the `ttf-ancient-fonts` package to correctly display some unicode symbols that are not covered by the Powerline fonts above.
-
-* A ZSH framework like [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
-
-
-## Installing
-
-After installing [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
-
-1. Download the theme [here](http://raw.github.com/guillermolam/agnosterlam-ohmyzsh-theme/master/agnosterlam.zsh-theme)
-
-2. Put the file **agnosterlam.zsh-theme** in **$ZSH_CUSTOM/themes/**
-
-3. Configure the theme in your **~/.zshrc** file:
-
-```bash
-ZSH_THEME="agnosterlam"
-```
-
-## Options
-
-agnosterlam is configurable. You can change colors and which segments you want
-or don't want to see. All options must be overridden in your **.zshrc** file.
-
-## Segments
-
-### Battery Life
-
-The info will display in case of the laptop is not charging.
-If you're using Linux, install `acpi` package (i.e. `sudo apt install acpi`).
-
-![Preview](images/agnosterlam-02.png)
-
-|Battery status|Color
-|--------------|-----|
-|more than 39%|`green`
-|less than 40% and more than 19%|`yellow`
-|less than 20%|`red`
-
-### Git
-![git-preview-1](images/agnosterlam-git-a.png)
-
-![git-preview-2](images/agnosterlam-git-b.png)
-
-#### Color States
-|Background Color & Foreground Color|Meaning
-|----------------|----------------|
-|![git-clean](images/agnosterlam-git-1.png)|Absolutely clean state
-|![git-stash](images/agnosterlam-git-2.png)|There are stashed files
-|![git-untracked](images/agnosterlam-git-3.png)|There are new untracked files
-|![git-modified](images/agnosterlam-git-4.png)|There are modified or deleted files but unstaged
-
-#### Icons
-Not leveraging more than just 1 Nerd Font, needed for [nerd-icons.el](https://github.com/rainstormstudio/nerd-icons.el)
-
-## Credits
-
-This theme is highly inspired by the following themes:
-- [Powerline](https://github.com/jeremyFreeAgent/oh-my-zsh-powerline-theme)
-- [Agnoster](https://gist.github.com/agnoster/3712874)
